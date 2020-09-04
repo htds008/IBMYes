@@ -13,8 +13,6 @@ create_mainfest_file(){
     echo "内存大小：${IBM_MEM_SIZE}"
     UUID=$(cat /proc/sys/kernel/random/uuid)
     echo "生成随机UUID：${UUID}"
-    WSPATH=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16)
-    echo "生成随机WebSocket路径：${WSPATH}"
     
     cat >  ${SH_PATH}/IBMYes/v2ray-cloudfoundry/manifest.yml  << EOF
     applications:
@@ -39,10 +37,7 @@ EOF
                     ]
                 },
                 "streamSettings": {
-                    "network":"ws",
-                    "wsSettings": {
-                        "path": ""
-                    }
+                    "network":"ws"
                 }
             }
         ],
@@ -60,7 +55,7 @@ EOF
 clone_repo(){
     echo "进行初始化。。。"
 	rm -rf IBMYes
-    git clone https://github.com/CCChieh/IBMYes
+    git clone https://github.com/htds008/IBMYes
     cd IBMYes
     git submodule update --init --recursive
     cd v2ray-cloudfoundry/v2ray
@@ -100,19 +95,17 @@ install(){
     ibmcloud cf push
     echo "安装完成。"
     echo "生成的随机 UUID：${UUID}"
-    echo "生成的随机 WebSocket路径：${WSPATH}"
     VMESSCODE=$(base64 -w 0 << EOF
     {
       "v": "2",
-      "ps": "ibmyes",
-      "add": "ibmyes.us-south.cf.appdomain.cloud",
+      "ps": "${IBM_APP_NAME}",
+      "add": "${IBM_HOST_NAME}.us-south.cf.appdomain.cloud",
       "port": "443",
       "id": "${UUID}",
       "aid": "4",
       "net": "ws",
       "type": "none",
       "host": "",
-      "path": "${WSPATH}",
       "tls": "tls"
     }
 EOF
